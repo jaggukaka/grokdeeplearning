@@ -3,3 +3,6 @@ nlpNN_w2.txt
 aclImdb/
 mnist_test.csv
 mnist_train.csv
+nlpNNBlank_w1.txt
+nlpNNBlank_w2.txt
+__pycache__/

@@ -1,53 +1,26 @@
 import numpy as np
-from os import walk
+import common
 
 #Read the aclImdb data, prepare data for training and then train
 
 trainsize = 24000
 testsize = 2000
-POS_FILE_PATH = './aclImdb/train/pos/'
-NEG_FILE_PATH = './aclImdb/train/neg/'
 
-TEST_POS = './aclImdb/test/pos/'
-TEST_NEG = './aclImdb/test/neg/'
+word2index = common.get_word_index_imdb()
 
-def get_files(path):
-    f = []
-    for (_,_,filenames) in walk(path):
-        f.extend(filenames)
-    return f
-
-def get_content(path):
-    with open(path, '+r') as f:
-        line = f.readline()
-        if line:
-            return line
-    return ""
-
-
-word2index = {}
-with open('./aclImdb/imdb.vocab', '+r') as f:
-    i = 0
-    while 1:
-        line = f.readline()
-        if not line:
-            break
-        word2index[line.strip()] = i
-        i += 1
-
-def prepare_data(posfilpath, negfilepath, size):
-    posfiles = get_files(posfilpath)
-    negfiles = get_files(negfilepath)
+def prepare_data(posfilpath, negfilepath, size, word2index):
+    posfiles = common.get_files(posfilpath)
+    negfiles = common.get_files(negfilepath)
     sz = min(2*len(posfiles), 2*len(negfiles), size)
 
     x_train = list()
-    y_train = np.zeros((trainsize, 1))
+    y_train = np.zeros((size, 1))
 
-    for i in range(int(trainsize/2)):
-        posline = get_content(posfilpath + posfiles[i])
+    for i in range(int(size/2)):
+        posline = common.get_content(posfilpath + posfiles[i])
         k = 2*i
         if (posline != ""):
-            sent_pos = posline.split(" ")
+            sent_pos = posline.lower().split(" ")
             sent_ls = list()
             for word in sent_pos:
                 if word in word2index:
@@ -55,27 +28,23 @@ def prepare_data(posfilpath, negfilepath, size):
                     y_train[k][0] = 1
             x_train.append(list(set(sent_ls)))
         
-        negline = get_content(negfilepath + negfiles[i])
+        negline = common.get_content(negfilepath + negfiles[i])
 
         if (negline != ""):
-            sent_neg = negline.split(" ")
+            sent_neg = negline.lower().split(" ")
             sent_ls = list()
             for word in sent_neg:
                 if word in word2index:
                     sent_ls.append(word2index[word])
             x_train.append(list(set(sent_ls)))
     return (x_train, y_train, sz)
-    
-(x_train, y_train, trainsize) = prepare_data(POS_FILE_PATH, NEG_FILE_PATH, trainsize)
-(x_test, y_test, testsize) = prepare_data(TEST_POS, TEST_NEG, testsize)
+
+(x_train, y_train, trainsize) = prepare_data(common.POS_FILE_PATH, common.NEG_FILE_PATH, trainsize, word2index)
+(x_test, y_test, testsize) = prepare_data(common.TEST_POS, common.TEST_NEG, testsize, word2index)
 
 np.random.seed(1)
 
-def sigmoid(x):
-    return 1/(1 + np.exp(-x))
 
-def sigmoid_deriv(x):
-    return x*(1-x)
 
 (iterations, hidden_size, alpha) = (2, 100, 0.01)
 
@@ -88,11 +57,11 @@ def train2l(input, w1, w2):
         for i in range(trainsize):
             y = y_train[i][0]
             l0 = input[i]
-            l1 = sigmoid(np.sum(w1[l0], axis=0))
-            l2 = sigmoid(l1.dot(w2))
+            l1 = common.sigmoid(np.sum(w1[l0], axis=0))
+            l2 = common.sigmoid(l1.dot(w2))
 
             d2 = l2 - y
-            d1 = d2.dot(w2.T)*sigmoid_deriv(l1)
+            d1 = d2.dot(w2.T)*common.sigmoid_deriv(l1)
 
             w1[l0] -= d1*alpha
             w2 -= np.outer(l1, d2)*alpha
@@ -111,8 +80,8 @@ def train2l(input, w1, w2):
     for i in range(testsize):
         y = y_test[i][0]
         l0 = x_test[i]
-        l1 = sigmoid(np.sum(w1[l0], axis = 0))
-        l2 = sigmoid(l1.dot(w2))
+        l1 = common.sigmoid(np.sum(w1[l0], axis = 0))
+        l2 = common.sigmoid(l1.dot(w2))
         d2 = l2 -y
 
         if (np.abs(d2) < 0.5):
@@ -129,8 +98,4 @@ print (nw1.shape, nw2.shape)
 #write the weights to file so that they can be reloaded
 np.savetxt('nlpNN_w1.txt', nw1, delimiter=",")
 np.savetxt('nlpNN_w2.txt', nw2, delimiter=",")
-
-            
-    
-
 
