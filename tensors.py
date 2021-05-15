@@ -99,6 +99,8 @@ class Tensor (object) :
         p = softmax_output.reshape(len(t),-1)
         target_dist = np.eye(p.shape[1])[t]
         loss = -(np.log(p) * (target_dist)).sum(1).mean()
+
+        #print (self.data.shape, temp.shape, t.shape, p.shape, target_dist.shape, loss.shape, target_indices.data.shape, softmax_output.shape)
     
         if(self.autograd):
             out = Tensor(loss,
@@ -108,6 +110,7 @@ class Tensor (object) :
             out.softmax_output = softmax_output
             out.target_dist = target_dist
             return out
+
 
         return Tensor(loss)
         

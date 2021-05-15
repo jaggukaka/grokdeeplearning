@@ -45,25 +45,25 @@ for i in range(10):
 
 #NN for bag of words or word embeddings
 
-data = tns.Tensor(np.array([1,2,1,2]), autograd=True)
+# data = tns.Tensor(np.array([1,2,1,2]), autograd=True)
 
-target = tns.Tensor(np.array([0,1,0,1]), autograd=True)
+# target = tns.Tensor(np.array([0,1,0,1]), autograd=True)
 
-model = tns.Sequential([tns.Embedding(3,3), tns.Tanh(), tns.Linear(3,4)])
-criterion = tns.CrossEntropyLoss()
+# model = tns.Sequential([tns.Embedding(3,3), tns.Tanh(), tns.Linear(3,4)])
+# criterion = tns.CrossEntropyLoss()
 
-optim = tns.SGD(parameters=model.get_parameters(), alpha=0.1)
+# optim = tns.SGD(parameters=model.get_parameters(), alpha=0.1)
 
-for i in range(10):
+# for i in range(10):
 
-    pred = model.forward(data)
+#     pred = model.forward(data)
 
-    loss = criterion.forward(pred, target)
+#     loss = criterion.forward(pred, target)
 
-    loss.backward(tns.Tensor(np.ones_like(loss.data)))
-    optim.step()
+#     loss.backward(tns.Tensor(np.ones_like(loss.data)))
+#     optim.step()
 
-    #print(loss)
+#     #print(loss)
 
 
 ##RNN using word embeds and RNN layer
